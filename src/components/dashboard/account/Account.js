@@ -141,22 +141,22 @@ class Account extends React.Component {
                         </div>
                     </ListItem>
                     <ListDivider />
-                    <ListItem
+                    {/* <ListItem
 
                     >
                         <ListItemText
                             primary={adxOnBids + ' ADX'}
                             secondary={t('EXCHANGE_ADX_BALANCE_ON_BIDS')}
-                        />
-                        {/* <div className={classes.itemActions}>
+                        /> */}
+                    {/* <div className={classes.itemActions}>
                             <RRButton
                                 to={`/dashboard/${this.props.side}/accepted-bids`}
                                 // TODO: Make this page
                                 label={t('GO_TO_ACCEPTED_BIDS')}
                             />
                         </div> */}
-                    </ListItem>
-                    <ListDivider />
+                    {/* </ListItem>
+                    <ListDivider /> */}
                 </List>
             </div>
         )

@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 
-import tokenAbi from './abi/ADXToken'
-import exchangeAbi from './abi/ADXExchange'
+import tokenAbi from './abi/TestToken'
+import exchangeAbi from './abi/AdExCore'
 import { testrpcCfg } from './ADXTestrpcCfg'
 import { exchange as EXCHANGE_CONSTANTS } from 'adex-constants'
 import { AUTH_TYPES } from 'constants/misc'
@@ -17,11 +17,11 @@ const mainnetCfg = {
 // TEMP
 let cfg
 
-// if (process.env.NODE_ENV === 'production') {
-cfg = mainnetCfg
-// } else {
-// 	cfg = testrpcCfg
-// }
+if (process.env.NODE_ENV === 'production') {
+	cfg = mainnetCfg
+} else {
+	cfg = testrpcCfg
+}
 
 const localWeb3 = () => {
 	const provider = new Web3.providers.HttpProvider(cfg.node)

@@ -7,7 +7,7 @@
 export const testrpcCfg = {
     node: 'https://ropsten.infura.io/TFyhO35Dd1LC2OVKanBJ',
     addr: {
-        token: '0xD06632e3916776e781d66A7A08ffBb77271742F7',
-        exchange: '0x6387622bd50fddda242384e34cf4cd45f535a2ef',
+        token: '0x58FAE82444eD771a1D0c1c3285c488d716ef3842',
+        exchange: '0x1280949d248d1Ef49899709E0dbCffdcbc36e2e8',
     }
 }

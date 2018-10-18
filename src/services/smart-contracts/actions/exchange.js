@@ -300,7 +300,7 @@ export const depositToExchange = ({ amountToDeposit, _addr, user, gas }) => {
                         txResults.push(result)
                         return sendTx({
                             web3,
-                            tx: exchange.methods.deposit(amount),
+                            tx: exchange.methods.deposit(token._address, amount),
                             opts: { from: _addr, gas: 90000 },
                             user,
                             txSuccessData: { trMethod: 'TRANS_MTD_EXCHANGE_DEPOSIT' },
@@ -336,7 +336,7 @@ export const withdrawFromExchange = ({ amountToWithdraw, _addr, gas, user, estim
 
     return getWeb3(user._authType)
         .then(({ web3, exchange, token, mode }) => {
-            let tx = exchange.methods.withdraw(amount)
+            let tx = exchange.methods.withdraw(token._address, amount)
 
             if (estimateGasOnly) {
                 return tx.estimateGas({ from: _addr })

@@ -64,7 +64,7 @@ export const getAccountStats = ({ _addr, authType, mode }) => {
         let balanceEth = web3.eth.getBalance(_addr)
         let balanceAdx = token.methods.balanceOf(_addr).call()
         let allowance = token.methods.allowance(_addr, cfg.addr.exchange).call()
-        let exchangeBalance = exchange.methods.getBalance(_addr).call()
+        let exchangeBalance = exchange.methods.balanceOf(token._address, _addr).call()
 
         let all = [balanceEth, balanceAdx, allowance, exchangeBalance]
 
@@ -76,7 +76,7 @@ export const getAccountStats = ({ _addr, authType, mode }) => {
                     balanceEth: balEth,
                     balanceAdx: balAdx,
                     allowance: allow,
-                    exchangeBalance: getExchangeBalances(exchBal)
+                    exchangeBalance: exchBal + '' // getExchangeBalances(exchBal)
                 }
 
                 return accStats
@@ -133,4 +133,5 @@ export const getTransactionsReceipts = (trHashes = []) => {
             return Promise.all(all)
         })
 }
+
 
