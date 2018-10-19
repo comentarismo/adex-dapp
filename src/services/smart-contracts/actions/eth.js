@@ -36,15 +36,15 @@ export const getCurrentGasPrice = () => {
     })
 }
 
-const getExchangeBalances = (exchBal = {}) => {
-    let adxOnExchangeTotal = ((exchBal[0] || 0))
-    let adxOnBids = ((exchBal[1] || 0))
-    let exchangeAvailable = adxOnExchangeTotal - adxOnBids + ''
+const getExchangeBalances = (exchBal = 0) => {
+    // let adxOnExchangeTotal = ((exchBal[0] || 0))
+    // let adxOnBids = ((exchBal[1] || 0))
+    // let exchangeAvailable = adxOnExchangeTotal - adxOnBids + ''
 
     return {
-        total: adxOnExchangeTotal,
-        onBids: adxOnBids,
-        available: exchangeAvailable
+        // total: adxOnExchangeTotal,
+        // onBids: adxOnBids,
+        available: exchBal + ''
     }
 }
 
@@ -52,7 +52,7 @@ const getExchangeBalances = (exchBal = {}) => {
 export const getAccountBalances = (_addr) => {
     return getWeb3()
         .then(({ cfg, exchange, token, web3 }) => {
-            return exchange.methods.getBalance(_addr).call()
+            return exchange.methods.balanceOf(token._address, _addr).call()
         })
         .then((exchBal) => {
             return getExchangeBalances(exchBal)
