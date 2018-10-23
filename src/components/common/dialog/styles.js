@@ -107,9 +107,6 @@ export const styles = theme => {
             width: '100px',
             height: 'auto',
             position: 'absolute'
-        },
-        demoBody: {
-            position: 'relative'
         }
     }
 }

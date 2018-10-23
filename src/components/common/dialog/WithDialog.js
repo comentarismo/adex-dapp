@@ -29,7 +29,7 @@ const Transition = (props) => {
     return <Slide direction="up" {...props} />;
 }
 
-export default function ItemHoc(Decorated) {
+export default function WithDialogHoc(Decorated) {
     class WithDialog extends Component {
         constructor(props) {
             super(props)

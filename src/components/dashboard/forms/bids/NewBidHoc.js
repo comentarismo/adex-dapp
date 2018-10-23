@@ -63,6 +63,7 @@ export default function NewBidHoc(Decorated) {
           this.onSave()
         })
         .catch((err) => {
+          console.log('err', err)
           this.props.actions.addToast({ type: 'cancel', action: 'X', label: t('ERR_PLACE_BID', { args: [Helper.getErrMsg(err)] }), timeout: 5000 })
           this.onSave()
         })

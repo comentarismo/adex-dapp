@@ -32,15 +32,15 @@ class BidForm extends Component {
   componentWillMount() {
     this.props.actions.updateSpinner(SPINNER_ID, true)
 
-    if (!this.props.bid.target) {
-      this.props.validate('target', {
+    if (!this.props.bid.goal) {
+      this.props.validate('goal', {
         isValid: false,
         err: { msg: 'ERR_REQUIRED_FIELD' },
         dirty: false
       })
     }
-    if (!this.props.bid.amount) {
-      this.props.validate('amount', {
+    if (!this.props.bid.tokenAmount) {
+      this.props.validate('tokenAmount', {
         isValid: false,
         err: { msg: 'ERR_REQUIRED_FIELD' },
         dirty: false
@@ -92,19 +92,20 @@ class BidForm extends Component {
       errMsgArgs.push(adxToFloatView(exchangeAvailable))
     }
 
-    this.props.validate('amount', { isValid: !msg, err: { msg: msg, args: errMsgArgs }, dirty: dirty })
+    this.props.validate('tokenAmount', { isValid: !msg, err: { msg: msg, args: errMsgArgs }, dirty: dirty })
   }
 
   render() {
     let bid = this.props.bid || {}
-    let { t, classes } = this.props
+    let { t, classes, invalidFields } = this.props
+
     let timeout = bid.timeout || constants.exchange.TIMEOUTS[0]
     let timeouts = constants.exchange.TIMEOUTS.map((tmo) => {
       return { value: tmo.value + '', label: t(tmo.label, { args: tmo.labelArgs }) }
     })
 
-    let errTarget = this.props.invalidFields['target']
-    let errAmount = this.props.invalidFields['amount']
+    let errTarget = invalidFields['goal']
+    let errAmount = invalidFields['tokenAmount']
     let exchangeAvailable = this.state.exchangeAvailable
 
     return (
@@ -123,13 +124,13 @@ class BidForm extends Component {
                 fullWidth
                 type='text'
                 required
-                label={t('BID_TARGET_CLICKS', { args: [numeral(bid.target).format('0')] })}
-                name='target'
+                label={t('BID_GOAL_CLICKS', { args: [numeral(bid.goal).format('0')] })}
+                name='goal'
                 step='1'
-                value={bid.target || ''}
-                onChange={(ev) => this.props.handleChange('target', ev.target.value)}
-                onBlur={this.props.validate.bind(this, 'target', { isValid: this.isValidTarget(bid.target), err: { msg: 'ERR_INVALID_TARGET' }, dirty: true })}
-                onFocus={this.props.validate.bind(this, 'target', { isValid: this.isValidTarget(bid.target), err: { msg: 'ERR_INVALID_TARGET' }, dirty: false })}
+                value={bid.goal || ''}
+                onChange={(ev) => this.props.handleChange('goal', ev.target.value)}
+                onBlur={this.props.validate.bind(this, 'goal', { isValid: this.isValidTarget(bid.goal), err: { msg: 'ERR_INVALID_GOAL' }, dirty: true })}
+                onFocus={this.props.validate.bind(this, 'goal', { isValid: this.isValidTarget(bid.goal), err: { msg: 'ERR_INVALID_GOAL' }, dirty: false })}
                 error={(errTarget && !!errTarget.dirty)}
                 helperText={errTarget && !!errTarget.dirty ? errTarget.errMsg : ''}
               />
@@ -139,12 +140,12 @@ class BidForm extends Component {
                 fullWidth
                 type='text'
                 required
-                label={t('BID_AMOUNT', { args: [numeral(bid.amount).format('ADX 0,0')] })}
-                name='amount'
-                value={bid.amount || ''}
-                onChange={(ev) => this.props.handleChange('amount', ev.target.value)}
-                onBlur={this.validateAmount.bind(this, bid.amount, true, exchangeAvailable)}
-                onFocus={this.validateAmount.bind(this, bid.amount, false, exchangeAvailable)}
+                label={t('BID_AMOUNT', { args: [numeral(bid.tokenAmount).format('ADX 0,0')] })}
+                name='tokenAmount'
+                value={bid.tokenAmount || ''}
+                onChange={(ev) => this.props.handleChange('tokenAmount', ev.target.value)}
+                onBlur={this.validateAmount.bind(this, bid.tokenAmount, true, exchangeAvailable)}
+                onFocus={this.validateAmount.bind(this, bid.tokenAmount, false, exchangeAvailable)}
                 error={(errAmount && !!errAmount.dirty)}
                 helperText={!errAmount ?
                   t('EXCHANGE_ADX_BALANCE_AVAILABLE_BID_INFO', { args: [adxToFloatView(exchangeAvailable)] }) : errAmount.errMsg}

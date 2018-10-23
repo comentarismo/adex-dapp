@@ -5,6 +5,7 @@ import { toHexParam, adxAmountStrToHex, adxAmountStrToPrecision, getRsvFromSig, 
 import { encrypt } from 'services/crypto/crypto'
 import { exchange as EXCHANGE_CONSTANTS } from 'adex-constants'
 import { helpers } from 'adex-models'
+import { Bid, BidState, SCHEMA_HASH } from 'adex-protocol-eth/js/Bid'
 
 const { ipfsHashTo32BytesHex } = helpers
 const GAS_LIMIT_ACCEPT_BID = 450000
@@ -191,6 +192,7 @@ export const refundBid = ({ placedBid: { _id, _advertiser, _publisher }, _addr, 
 
 // gets the hash (bid id) from adex exchange contract
 const getAdexExchangeBidHash = ({ exchange, typedData }) => {
+    console.log('exchange.methods', exchange)
     // getBidID(address _advertiser, bytes32 _adunit, uint _opened, uint _target, uint _amount, uint _timeout)
     return exchange.methods.getBidID(typedData[0].value, typedData[1].value, typedData[2].value, typedData[3].value, typedData[4].value, typedData[5].value)
         .call()
@@ -198,14 +200,27 @@ const getAdexExchangeBidHash = ({ exchange, typedData }) => {
 
 export const signBid = ({ userAddr, bid, user }) => {
     return getWeb3(user._authType)
-        .then(({ cfg, web3, exchange }) => {
+        .then(({ cfg, web3, token, exchange }) => {
             //NOTE: We need to set the exchangeAddr because it is needed for the hash
             bid.exchangeAddr = cfg.addr.exchange //Need bid instance
-            bid.amount = adxAmountStrToPrecision(bid.amount) // * 10 000 but safe
-            bid.opened = Date.now()
+            bid.tokenAmount = adxAmountStrToPrecision(bid.tokenAmount) // * 10 000 but safe
+            bid.tokenAddr = token._address
+            bid.nonce = Date.now()
 
             // NOTE: Currently instance of bid is passed - must be changed
             let typed = bid.typed
+
+            const bidInst = new Bid({
+                advertiser: bid.advertiser,
+                adUnit: helpers.ipfsHashTo32BytesHex(bid.adUnit),
+                goal: toHexParam(bid.goal),
+                timeout: bid.timeout,
+                tokenAddr: bid.tokenAddr,
+                tokenAmount: bid.tokenAmount,
+                nonce: bid.nonce,
+                validators: bid.validators,
+                validatorRewards: bid.validatorRewards
+            })
 
             let hashCheck = getTypedDataHash({ typedData: typed })
             // let mode = user._signType
