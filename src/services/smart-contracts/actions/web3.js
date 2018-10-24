@@ -176,10 +176,10 @@ export const signTypedLedger = ({ userAddr, hdPath, addrIdx, typedData, hash }) 
         })
 }
 
-export const signTypedMsg = ({ authType, userAddr, hdPath, addrIdx, typedData }) => {
+export const signTypedMsg = ({ authType, userAddr, hdPath, addrIdx, typedData, dataHash }) => {
     let pr
 
-    let hash = getTypedDataHash({ typedData: typedData })
+    let hash = dataHash || getTypedDataHash({ typedData: typedData })
 
     console.log('hash', hash)
     console.log('authType', authType)

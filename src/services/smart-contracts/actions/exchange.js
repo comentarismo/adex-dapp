@@ -210,34 +210,24 @@ export const signBid = ({ userAddr, bid, user }) => {
             // NOTE: Currently instance of bid is passed - must be changed
             let typed = bid.typed
 
-            const bidInst = new Bid({
-                advertiser: bid.advertiser,
-                adUnit: helpers.ipfsHashTo32BytesHex(bid.adUnit),
-                goal: toHexParam(bid.goal),
-                timeout: bid.timeout,
-                tokenAddr: bid.tokenAddr,
-                tokenAmount: bid.tokenAmount,
-                nonce: bid.nonce,
-                validators: bid.validators,
-                validatorRewards: bid.validatorRewards
-            })
+            const bidInst = bid.protocolBid
 
-            let hashCheck = getTypedDataHash({ typedData: typed })
+            const hash = bidInst.hash(exchange._address)
+            // const values = bidInst.values()
+
+            // let hashCheck = getTypedDataHash({ typedData: typed })
             // let mode = user._signType
 
             // console.log('user', user)
 
-            return getAdexExchangeBidHash({ exchange: exchange, typedData: typed })
-                .then((scHash) => {
-                    if (scHash === hashCheck) {
-                        return hashCheck
-                    } else {
-                        throw new Error('Error calculated hash does not match exchange id')
-                    }
-                })
-                .then((checkedHash) => {
-                    return signTypedMsg({ userAddr, authType: user._authType, typedData: typed, addrIdx: user._hdWalletAddrIdx, hdPath: user._hdWalletAddrPath })
-                })
+            return signTypedMsg({
+                userAddr,
+                authType: user._authType,
+                typedData: typed,
+                addrIdx: user._hdWalletAddrIdx,
+                hdPath: user._hdWalletAddrPath,
+                dataHash: hash
+            })
                 .then((res) => {
                     let signature = { sig_mode: res.mode, signature: res.sig, hash: res.hash, ...getRsvFromSig(res.sig) }
                     return signature
