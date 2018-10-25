@@ -36,6 +36,41 @@ const checkBidIdAndSign = ({ exchange, _id, _advertiser, _adUnit, _opened, _targ
         })
 }
 
+export const commitmentStart = ({ bidInst, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
+    return getWeb3(user._authType)
+        .then(({ web3, exchange, token }) => {
+
+            const protocolBid = bidInst.protocolBid
+
+            // commitmentStart(bytes32[7] bidValues, address[] bidValidators, uint[] bidValidatorRewards, bytes32[3] signature, address extraValidator)
+            const tx = exchange.methods.commitmentStart(
+                protocolBid.values,
+                protocolBid.validators,
+                protocolBid.validatorRewards,
+                [
+                    '0x0' + bidInst.signature.sig_mode + bidInst.signature.v.toString(16) + '000000000000000000000000000000000000000000000000000000000000',
+                    bidInst.signature.r,
+                    bidInst.signature.s
+
+                ],
+                '0x0')
+
+            const bidHash = protocolBid.hash(exchange._address)
+
+            if (estimateGasOnly) {
+                return tx.estimateGas({ from: _addr })
+            } else {
+                return sendTx({
+                    web3,
+                    tx: tx,
+                    opts: { from: _addr, gas },
+                    user,
+                    txSuccessData: { bidId: bidHash, state: 1, trMethod: 'TX_MTD_COMMITMENT_START' }
+                })
+            }
+        })
+}
+
 export const acceptBid = ({ placedBid: { _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, _signature: { v, r, s, sig_mode } }, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
     return getWeb3(user._authType)
         .then(({ web3, exchange, token }) => {
