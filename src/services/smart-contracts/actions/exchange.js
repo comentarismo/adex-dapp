@@ -4,8 +4,8 @@ import { GAS_PRICE, MULT, DEFAULT_TIMEOUT } from 'services/smart-contracts/const
 import { toHexParam, adxAmountStrToHex, adxAmountStrToPrecision, getRsvFromSig, getTypedDataHash } from 'services/smart-contracts/utils'
 import { encrypt } from 'services/crypto/crypto'
 import { exchange as EXCHANGE_CONSTANTS } from 'adex-constants'
-import { helpers } from 'adex-models'
-import { Bid, BidState, SCHEMA_HASH } from 'adex-protocol-eth/js/Bid'
+import { helpers, Bid } from 'adex-models'
+// import { Bid, BidState, SCHEMA_HASH } from 'adex-protocol-eth/js/Bid'
 
 const { ipfsHashTo32BytesHex } = helpers
 const GAS_LIMIT_ACCEPT_BID = 450000
@@ -36,15 +36,16 @@ const checkBidIdAndSign = ({ exchange, _id, _advertiser, _adUnit, _opened, _targ
         })
 }
 
-export const commitmentStart = ({ bidInst, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
+export const acceptBid = ({ placedBid, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
     return getWeb3(user._authType)
         .then(({ web3, exchange, token }) => {
+            const bidInst = new Bid(placedBid)
 
             const protocolBid = bidInst.protocolBid
 
             // commitmentStart(bytes32[7] bidValues, address[] bidValidators, uint[] bidValidatorRewards, bytes32[3] signature, address extraValidator)
             const tx = exchange.methods.commitmentStart(
-                protocolBid.values,
+                protocolBid.values(),
                 protocolBid.validators,
                 protocolBid.validatorRewards,
                 [
@@ -56,7 +57,7 @@ export const commitmentStart = ({ bidInst, _adSlot, _addr, gas, onReceipt, user,
                 '0x0')
 
             const bidHash = protocolBid.hash(exchange._address)
-
+            
             if (estimateGasOnly) {
                 return tx.estimateGas({ from: _addr })
             } else {
@@ -71,73 +72,34 @@ export const commitmentStart = ({ bidInst, _adSlot, _addr, gas, onReceipt, user,
         })
 }
 
-export const acceptBid = ({ placedBid: { _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, _signature: { v, r, s, sig_mode } }, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
+// The bid is canceled by the advertiser ()
+export const cancelBid = ({ placedBid, _addr, gas, user, estimateGasOnly } = {}) => {
     return getWeb3(user._authType)
         .then(({ web3, exchange, token }) => {
-            /* TODO: Maybe we should keep _adUnit and _adSlot as it is on the contract (in 32 bytes hex)
-            *   and decode it in the ui when needed
-            * */
-            _adUnit = ipfsHashTo32BytesHex(_adUnit)
-            _adSlot = ipfsHashTo32BytesHex(_adSlot)
-            _opened = _opened.toString() // TODO: validate - max 365 day in seconds (60 * 60 * 24 * 365)
-            _target = _target.toString()
-            _amount = _amount.toString()
-            _timeout = _timeout.toString()
-            v = '0x' + v.toString(16)
-            sig_mode = (sig_mode).toString()
+            const bidInst = new Bid(placedBid)
 
-            let tx = exchange.methods.acceptBid(_advertiser, _adUnit, _opened, _target, _amount, _timeout, _adSlot, v, r, s, sig_mode)
+            const protocolBid = bidInst.protocolBid
 
-            // TODO: Maybe we dont need to check didSign and getBidID
-            return checkBidIdAndSign({ exchange, _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, v, r, s, sig_mode })
-                .then(() => {
-                    if (estimateGasOnly) {
-                        return tx.estimateGas({ from: _addr })
-                    } else {
-                        return sendTx({
-                            web3,
-                            tx: tx,
-                            opts: { from: _addr, gas },
-                            user,
-                            txSuccessData: { bidId: _id, state: EXCHANGE_CONSTANTS.BID_STATES.Accepted.id, trMethod: 'TRANS_MTD_EXCHANGE_ACCEPT_BID' }
-                        })
-                    }
+            // function bidCancel(bytes32[7] bidValues, address[] bidValidators, uint[] bidValidatorRewards) 
+            const tx = exchange.methods.bidCancel(
+                protocolBid.values(),
+                protocolBid.validators,
+                protocolBid.validatorRewards,
+            )
+
+            const bidHash = protocolBid.hash(exchange._address)
+
+            if (estimateGasOnly) {
+                return tx.estimateGas({ from: _addr })
+            } else {
+                return sendTx({
+                    web3,
+                    tx: tx,
+                    opts: { from: _addr, gas: gas },
+                    user,
+                    txSuccessData: { bidId: bidHash, state: 2, trMethod: 'TX_MTD_BID_CANCEL' }
                 })
-        })
-}
-
-// The bid is canceled by the advertiser
-export const cancelBid = ({ placedBid: { _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, _signature: { v, r, s, sig_mode } }, _addr, gas, user, estimateGasOnly } = {}) => {
-    return getWeb3(user._authType)
-        .then(({ web3, exchange, token }) => {
-            _adUnit = ipfsHashTo32BytesHex(_adUnit)
-            _opened = _opened.toString() // TODO: validate - max 365 day in seconds (60 * 60 * 24 * 365)
-            _target = _target.toString()
-            _amount = _amount.toString()
-            _timeout = _timeout.toString()
-            v = '0x' + v.toString(16)
-            sig_mode = (sig_mode).toString()
-
-            let _advertiser = _addr
-
-            // function cancelBid(bytes32 _adunit, uint _opened, uint _target, uint _amount, uint _timeout, uint8 v, bytes32 r, bytes32 s, uint8 sigMode)
-            let tx = exchange.methods.cancelBid(_adUnit, _opened, _target, _amount, _timeout, v, r, s, sig_mode)
-
-            // NOTE: if checkBidIdAndSign we can handle the error on tx preview and not let the user to try sign the tx  
-            return checkBidIdAndSign({ exchange, _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, v, r, s, sig_mode })
-                .then(() => {
-                    if (estimateGasOnly) {
-                        return tx.estimateGas({ from: _addr })
-                    } else {
-                        return sendTx({
-                            web3,
-                            tx: tx,
-                            opts: { from: _addr, gas: gas },
-                            user,
-                            txSuccessData: { bidId: _id, state: EXCHANGE_CONSTANTS.BID_STATES.Canceled.id, trMethod: 'TRANS_MTD_EXCHANGE_CANCEL_BID' }
-                        })
-                    }
-                })
+            }
         })
 }
 

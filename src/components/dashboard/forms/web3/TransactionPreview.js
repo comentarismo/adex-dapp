@@ -38,7 +38,7 @@ class TransactionPreview extends Component {
                     this.props.actions.updateSpinner(this.props.trId, false)
                 })
                 .catch((err) => {
-                    console.log(err)
+                    console.error(err)
                     this.props.actions.updateSpinner(this.props.trId, false)
                     this.props.handleChange('errors', [Helper.getErrMsg(err)])
                 })
