@@ -3,15 +3,16 @@ import actions from 'actions'
 import { items as ItemsConstants, exchange as ExchangeConstants } from 'adex-constants'
 import { getBidsBySide } from 'services/adex-node/actions'
 
-const { BID_STATES } = ExchangeConstants
+const { BID_STATE } = ExchangeConstants
 
 export const sortBids = (bids) => {
     const sorted = bids.reduce((memo, bid) => {
-        if (bid._state === BID_STATES.DoesNotExist.id) {
+        if (bid._state === BID_STATE.Unknown.id) {
             memo.open.push(bid)
-        } else if (bid._state === BID_STATES.Accepted.id
-            || bid._state === BID_STATES.ConfirmedAdv.id
-            || bid._state === BID_STATES.ConfirmedPub.id) {
+        } else if (bid._state === BID_STATE.Active.id
+            // || bid._state === BID_STATE.ConfirmedAdv.id
+            // || bid._state === BID_STATES.ConfirmedPub.id
+            ) {
             if (bid.clicksCount >= bid._target) {
                 memo.action.push(bid)
             } else {

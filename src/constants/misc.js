@@ -1,5 +1,5 @@
 import { exchange as ExchangeConstants, items as ItemsConstants } from 'adex-constants'
-const { BID_STATES, TIMEOUTS, SIGN_TYPES } = ExchangeConstants
+const { BID_STATE, TIMEOUTS, SIGNATURE_MODE } = ExchangeConstants
 const { AdTypes, AdSizes } = ItemsConstants
 
 export const NO_IMAGE_URL = 'https://crestaproject.com/demo/nucleare-pro/wp-content/themes/nucleare-pro/images/no-image-box.png'
@@ -14,7 +14,7 @@ export const SORT_PROPERTIES_BIDS = [
 ]
 
 export const FILTER_PROPERTIES_BIDS = {
-    _state: { label: '_state', labelIsProp: true, values: Object.keys(BID_STATES).map((key) => { return { value: BID_STATES[key].id, label: BID_STATES[key].label } }) },
+    _state: { label: '_state', labelIsProp: true, values: Object.keys(BID_STATE).map((key) => { return { value: BID_STATE[key].id, label: BID_STATE[key].label } }) },
     _timeout: { label: '_timeout', labelIsProp: true, values: TIMEOUTS }
 }
 
@@ -40,8 +40,8 @@ export const FILTER_PROPERTIES_ITEMS = {
 }
 
 export const AUTH_TYPES = {
-    METAMASK: { name: 'metamask', signType: SIGN_TYPES.Eip.id },
-    TREZOR: { name: 'trezor', signType: SIGN_TYPES.Trezor.id },
-    LEDGER: { name: 'ledger', signType: SIGN_TYPES.EthPersonal.id },
-    DEMO: { name: 'demo', signType: SIGN_TYPES.EthPersonal.id }
+    METAMASK: { name: 'metamask', signType: SIGNATURE_MODE.GETH.id },
+    TREZOR: { name: 'trezor', signType: SIGNATURE_MODE.TREZOR.id },
+    LEDGER: { name: 'ledger', signType: SIGNATURE_MODE.GETH.id },
+    DEMO: { name: 'demo', signType: SIGNATURE_MODE.GETH.id }
 }

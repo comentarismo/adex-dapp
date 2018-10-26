@@ -17,7 +17,7 @@ import { styles } from './styles'
 import Grid from '@material-ui/core/Grid'
 import { getStatsValues } from 'helpers/accStatsHelpers'
 
-const { BidStatesLabels, BID_STATES } = ExchangeConstants
+const { BidStateLabels, BID_STATE } = ExchangeConstants
 
 // const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#EBE', '#FAC']
 
@@ -59,15 +59,15 @@ export class DashboardStats extends Component {
     mapClosedBidsToStats = (bids) => {
         return bids.reduce((memo, bid) => {
             switch (bid._state) {
-                case BID_STATES.Canceled.id:
+                case BID_STATE.Canceled.id:
                     memo.canceled.count += 1
                     memo.canceled.amount += parseInt(bid._tokenAmount, 10)
                     break
-                case BID_STATES.Expired.id:
+                case BID_STATE.DeliveryTimedOut.id:
                     memo.expired.count += 1
                     memo.expired.amount += parseInt(bid._tokenAmount, 10)
                     break
-                case BID_STATES.Completed.id:
+                case BID_STATE.DeliverySucceeded.id:
                     memo.completed.count += 1
                     memo.completed.amount += parseInt(bid._tokenAmount, 10)
                     break
@@ -80,7 +80,7 @@ export class DashboardStats extends Component {
     }
 
     getLabel = (state, count, extraLabel) => {
-        return this.props.t(BidStatesLabels[state]) + (extraLabel ? extraLabel : '') + ' [' + count + ']'
+        return this.props.t(BidStateLabels[state]) + (extraLabel ? extraLabel : '') + ' [' + count + ']'
     }
 
     mapData = ({ action = [], active = [], closed = [], open = [] }) => {
@@ -96,7 +96,7 @@ export class DashboardStats extends Component {
 
         stats.action = this.mapBidsToStats(action)
         const actionCount = stats.action.count
-        PieLabels.push(this.getLabel(BID_STATES.Accepted.id, actionCount, ' (' + this.props.t('BIDS_READY_TO_VERIFY') + ')'))
+        PieLabels.push(this.getLabel(BID_STATE.Active.id, actionCount, ' (' + this.props.t('BIDS_READY_TO_VERIFY') + ')'))
         PieDataCount.push(actionCount)
         PieDataAmount.push(stats.action.amount)
         totalCount += actionCount
@@ -104,7 +104,7 @@ export class DashboardStats extends Component {
 
         stats.active = this.mapBidsToStats(active)
         const activeCount = stats.active.count
-        PieLabels.push(this.getLabel(BID_STATES.Accepted.id, activeCount, ' (' + this.props.t('BIDS_ACTIVE') + ')'))
+        PieLabels.push(this.getLabel(BID_STATE.Active.id, activeCount, ' (' + this.props.t('BIDS_ACTIVE') + ')'))
         PieDataCount.push(activeCount)
         PieDataAmount.push(stats.active.amount)
         totalCount += activeCount
@@ -112,7 +112,7 @@ export class DashboardStats extends Component {
 
         stats.open = this.mapBidsToStats(open)
         const openCount = stats.open.count
-        PieLabels.push(this.getLabel(BID_STATES.DoesNotExist.id, openCount))
+        PieLabels.push(this.getLabel(BID_STATE.Unknown.id, openCount))
         PieDataCount.push(openCount)
         PieDataAmount.push(stats.open.amount)
         totalCount += openCount
@@ -121,21 +121,21 @@ export class DashboardStats extends Component {
         stats.closed = this.mapClosedBidsToStats(closed)
 
         const completedCount = stats.closed.completed.count
-        PieLabels.push(this.getLabel(BID_STATES.Completed.id, completedCount))
+        PieLabels.push(this.getLabel(BID_STATE.DeliverySucceeded.id, completedCount))
         PieDataCount.push(completedCount)
         PieDataAmount.push(stats.closed.completed.amount)
         totalCount += completedCount
         tabs.push('closed')
 
         const canceledCount = stats.closed.canceled.count
-        PieLabels.push(this.getLabel(BID_STATES.Canceled.id, canceledCount))
+        PieLabels.push(this.getLabel(BID_STATE.Canceled.id, canceledCount))
         PieDataCount.push(canceledCount)
         PieDataAmount.push(stats.closed.canceled.amount)
         totalCount += canceledCount
         tabs.push('closed')
 
         const expiredCount = stats.closed.expired.count
-        PieLabels.push(this.getLabel(BID_STATES.Expired.id, expiredCount))
+        PieLabels.push(this.getLabel(BID_STATE.DeliveryTimedOut.id, expiredCount))
         PieDataCount.push(expiredCount)
         PieDataAmount.push(stats.closed.expired.amount)
         totalCount += expiredCount

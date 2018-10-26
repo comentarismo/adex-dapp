@@ -28,7 +28,7 @@ import { styles } from './styles'
 const RRAnchor = withReactRouterLink(Anchor)
 const ItemIpfsDetailsDialog = WithDialog(ItemIpfsDetails)
 
-const { BID_STATES, BidStatesLabels } = ExchangeConstants
+const { BID_STATE, BidStateLabels } = ExchangeConstants
 
 const TableCell = ({ children, ...rest }) =>
     <TableCellMui
@@ -39,13 +39,12 @@ const TableCell = ({ children, ...rest }) =>
     </TableCellMui >
 
 export const StateIcons = {
-    [BID_STATES.DoesNotExist.id]: { icon: <MoreHoriz style={{ color: '#0277BD' }} /> },
-    [BID_STATES.Accepted.id]: { icon: <Done style={{ color: '#0277BD' }} /> },
-    [BID_STATES.Canceled.id]: { icon: <Close style={{ color: '#787878' }} /> },
-    [BID_STATES.Expired.id]: { icon: <AccessTime style={{ color: '#FF5722' }} /> },
-    [BID_STATES.Completed.id]: { icon: <DoneAll style={{ color: '#00FFBF' }} /> },
-    [BID_STATES.ConfirmedAdv.id]: { icon: <Done style={{ color: '#00E5FF' }} /> },
-    [BID_STATES.ConfirmedPub.id]: { icon: <Done style={{ color: '#00E5FF' }} /> },
+    [BID_STATE.Unknown.id]: { icon: <MoreHoriz style={{ color: '#0277BD' }} /> },
+    [BID_STATE.Active.id]: { icon: <Done style={{ color: '#0277BD' }} /> },
+    [BID_STATE.Canceled.id]: { icon: <Close style={{ color: '#787878' }} /> },
+    [BID_STATE.DeliveryTimedOut.id]: { icon: <AccessTime style={{ color: '#FF5722' }} /> },
+    [BID_STATE.DeliveryFailed.id]: { icon: <DoneAll style={{ color: '#00FFBF' }} /> },
+    [BID_STATE.DeliverySucceeded.id]: { icon: <Done style={{ color: '#00E5FF' }} /> },
 }
 
 export const bidDetails = ({ bidData, t, side }) => {
@@ -261,7 +260,7 @@ export const getCommonBidData = ({ bid, t, side }) => {
                 style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
             >
                 <span style={{ marginRight: 8 }}> {StateIcons[bid._state].icon}</span>
-                <span>{t(BidStatesLabels[bid._state])}</span>
+                <span>{t(BidStateLabels[bid._state])}</span>
             </span>,
         sideData: sideData,
         accepted: accepted,
@@ -326,13 +325,14 @@ export const getPublisherBidData = ({ bid, t, transactions, side, item, account,
     const pendingTransaction = transactions[bid.unconfirmedStateTrHash]
     const pendingState = !!pendingTransaction ? pendingTransaction.state : (bid.unconfirmedStateId || null)
 
+    // TODO: FIX THIS TO WORK WITH NEW VENTS
     const noTargetsReached = bid.clicksCount < bid._goal
-    const canAccept = (bid._state === BID_STATES.DoesNotExist.id)
-    const canVerify = (bid._state === BID_STATES.Accepted.id) && ((bid.clicksCount >= bid._goal) || bid._advertiserConfirmation)
-    const canGiveup = bid._state === BID_STATES.Accepted.id
-    const pendingGiveup = pendingState === BID_STATES.Canceled.id
-    const pendingAccept = pendingState === BID_STATES.Accepted.id
-    const pendingVerify = (pendingState === BID_STATES.ConfirmedPub.id) || (bid.unconfirmedStateId === BID_STATES.Completed.id)
+    const canAccept = (bid._state === BID_STATE.Unknown.id)
+    const canVerify = (bid._state === BID_STATE.Active.id) && ((bid.clicksCount >= bid._goal) || bid._advertiserConfirmation)
+    const canGiveup = bid._state === BID_STATE.Active.id
+    const pendingGiveup = pendingState === BID_STATE.Canceled.id
+    const pendingAccept = pendingState === BID_STATE.Active.id
+    const pendingVerify = (pendingState === BID_STATE.DeliveryFailed.id) || (bid.unconfirmedStateId === BID_STATE.Completed.id)
 
     let bidData = getCommonBidData({ bid, t, side: side })
 
@@ -390,14 +390,14 @@ export const getAdvertiserBidData = ({ bid, t, transactions, side, item, account
     const pendingTransaction = transactions[bid.unconfirmedStateTrHash]
     const pendingState = !!pendingTransaction ? pendingTransaction.state : (bid.unconfirmedStateId || null)
 
-    const canCancel = (bid._state === BID_STATES.DoesNotExist.id)
-    const canVerify = (bid._state === BID_STATES.Accepted.id) && !bid._advertiserConfirmation
+    const canCancel = (bid._state === BID_STATE.Unknown.id)
+    const canVerify = (bid._state === BID_STATE.Active.id) && !bid._advertiserConfirmation
     const targetReached = bid.clicksCount >= bid._goal
-    const canRefund = (bid._state === BID_STATES.Accepted.id) && (bidData.bidExpires < Date.now()) && !bid._advertiserConfirmation
-    const pendingCancel = pendingState === BID_STATES.Canceled.id
-    const pendingRefund = pendingState === BID_STATES.Expired.id
-    const pendingVerify = (pendingState === BID_STATES.ConfirmedAdv.id) || (bid.unconfirmedStateId === BID_STATES.Completed.id)
-    const pendingAcceptByPub = bid.unconfirmedStateId === BID_STATES.Accepted.id
+    const canRefund = (bid._state === BID_STATE.Active.id) && (bidData.bidExpires < Date.now()) && !bid._advertiserConfirmation
+    const pendingCancel = pendingState === BID_STATE.Canceled.id
+    const pendingRefund = pendingState === BID_STATE.DeliveryTimedOut.id
+    const pendingVerify = (pendingState === BID_STATE.DeliverySucceeded.id)  // || (bid.unconfirmedStateId === BID_STATE.Completed.id)
+    const pendingAcceptByPub = bid.unconfirmedStateId === BID_STATE.Active.id
 
     bidData.cancelBtn = canCancel ?
         <CancelBid
