@@ -346,15 +346,15 @@ export class BidsStatistics extends Component {
 
             const row = [
                 bid._id,
-                adxToFloatView(bid._amount),
-                bid._target,
+                adxToFloatView(bid._tokenAmount),
+                bid._goal,
                 bid.clicksCount || 0,
                 t(BidStatesLabels[bid._state]),
                 bid.statistics.statsUniqueClicks,
                 bid.statistics.daily.clicks || 0,
                 bid.statistics.daily.loaded || 0,
                 statsUniqueClicks > 0 ?
-                    (adxToFloatView(Math.floor(parseInt(bid._amount, 10) / parseInt(bid._target, 10)) * statsUniqueClicks))
+                    (adxToFloatView(Math.floor(parseInt(bid._tokenAmount, 10) / parseInt(bid._goal, 10)) * statsUniqueClicks))
                     : 0,
                 moment.duration(timeout, 'ms').humanize(),
                 accepted ? moment(accepted).format(DATETIME_EXPORT_FORMAT) : '-',

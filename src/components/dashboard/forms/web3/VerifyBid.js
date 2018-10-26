@@ -20,7 +20,7 @@ class VerifyBid extends Component {
             errMsg: null,
             errArgs: [],
             // TODO: give this option to publisher only if the bid is verified by advertiser first!
-            targetReached: props.placedBid.clicksCount >= props.placedBid._target,
+            targetReached: props.placedBid.clicksCount >= props.placedBid._goal,
         }
     }
 

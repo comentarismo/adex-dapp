@@ -12,30 +12,6 @@ const GAS_LIMIT_ACCEPT_BID = 450000
 const GAS_LIMIT_APPROVE_0_WHEN_NO_0 = 65136 + 1
 const GAS_LIMIT_APPROVE_OVER_0_WHEN_0 = 65821 + 1
 
-const checkBidIdAndSign = ({ exchange, _id, _advertiser, _adUnit, _opened, _target, _amount, _timeout, v, r, s, sig_mode }) => {
-    return exchange.methods
-        .didSign(_advertiser, _id, v, r, s, sig_mode)
-        .call()
-        .then((didSign) => {
-            if (!didSign) {
-                throw new Error('Invalid signature')
-            } else {
-
-                return exchange.methods.getBidID(_advertiser, _adUnit, _opened, _target, _amount, _timeout)
-                    .call()
-            }
-        })
-        .then((idCheck) => {
-            console.log('idCheck', idCheck)
-            console.log('_id', _id)
-            if (idCheck !== _id) {
-                throw new Error('idChecked err')
-            } else {
-                return true
-            }
-        })
-}
-
 export const acceptBid = ({ placedBid, _adSlot, _addr, gas, onReceipt, user, estimateGasOnly } = {}) => {
     return getWeb3(user._authType)
         .then(({ web3, exchange, token }) => {

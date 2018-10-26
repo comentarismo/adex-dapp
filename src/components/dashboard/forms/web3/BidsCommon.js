@@ -85,11 +85,11 @@ export const bidInfo = ({ bid, slot, unit, t, report, errMsg, errArgs, stickyTop
             />
             <PropRow
                 left={t('BID_TARGET')}
-                right={bid._target}
+                right={bid._goal}
             />
             <PropRow
                 left={t('BID_AMOUNT')}
-                right={adxToFloatView(bid._amount) + ' ADX'}
+                right={adxToFloatView(bid._tokenAmount) + ' ADX'}
             />
             <PropRow
                 left={t('BID_TIMEOUT')}

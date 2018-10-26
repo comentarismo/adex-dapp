@@ -28,11 +28,11 @@ class BidFormPreview extends Component {
           <Grid container spacing={16}>
             <PropRow
               left={t('BID_TARGET_CLICKS')}
-              right={bid.target}
+              right={bid.goal}
             />
             <PropRow
               left={t('BID_AMOUNT')}
-              right={bid.amount}
+              right={bid.tokenAmount}
             />
             <PropRow
               left={t('BID_TIMEOUT')}

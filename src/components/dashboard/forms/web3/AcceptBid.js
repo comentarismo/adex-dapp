@@ -32,7 +32,7 @@ class AcceptBid extends Component {
             .then((balances) => {
 
                 let available = parseInt(balances.available, 10)
-                let bid = parseInt(placedBid._amount, 10)
+                let bid = parseInt(placedBid._tokenAmount, 10)
 
                 if ((available < bid)) {
                     this.setState({ errMsg: 'ERR_NO_ADV_AMOUNT_ON_EXCHANGE' })

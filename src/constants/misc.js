@@ -8,8 +8,8 @@ export const AVATAR_MAX_HEIGHT = 400
 
 export const SORT_PROPERTIES_BIDS = [
     { value: '_state', label: '' },
-    { value: '_target', label: '' },
-    { value: '_amount', label: '' },
+    { value: '_goal', label: '' },
+    { value: '_tokenAmount', label: '' },
     { value: '_timeout', label: '' }
 ]
 

@@ -54,8 +54,8 @@ export const bidDetails = ({ bidData, t, side }) => {
         <ContentBox>
             <ContentBody>
                 <PropRow left={t('BID_ID')} right={bidData._id} />
-                <PropRow left={t('BID_AMOUNT')} right={bidData._amount} />
-                <PropRow left={t('BID_TARGET')} right={bidData._target} />
+                <PropRow left={t('BID_AMOUNT')} right={bidData._tokenAmount} />
+                <PropRow left={t('BID_TARGET')} right={bidData._goal} />
                 <PropRow left={t('BID_UNIQUE_CLICKS')} right={bidData.clicksCount} />
                 <PropRow left={t('BID_STATE')} right={bidData._state} />
                 <PropRow left={t(bidData.sideData.label)} right={bidData.sideData.owner} />
@@ -121,9 +121,9 @@ export const renderCommonTableRow = ({ bidData, t, side, classes = {} }) => {
                     iconButton
                 />
             </TableCell>
-            <TableCell> {bidData._amount} </TableCell>
+            <TableCell> {bidData._tokenAmount} </TableCell>
             <TableCell>
-                {bidData._target} / {bidData.clicksCount}
+                {bidData._goal} / {bidData.clicksCount}
             </TableCell>
             <TableCell>
                 {bidData._state}
@@ -207,9 +207,9 @@ export const renderCommonTableRowStats = ({ bidData, t, side, classes }) => {
                     {bidData._id}
                 </Typography >
             </TableCell>
-            <TableCell> {bidData._amount} </TableCell>
+            <TableCell> {bidData._tokenAmount} </TableCell>
             <TableCell>
-                {bidData._target} / {bidData.clicksCount}
+                {bidData._goal} / {bidData.clicksCount}
             </TableCell>
             <TableCell>
                 {bidData._state}
@@ -225,7 +225,7 @@ export const renderCommonTableRowStats = ({ bidData, t, side, classes }) => {
             </TableCell>
             <TableCell>
                 {statsUniqueClicks > 0 ?
-                    (adxToFloatView(Math.floor(parseInt(bidData.amount, 10) / parseInt(bidData._target, 10)) * statsUniqueClicks))
+                    (adxToFloatView(Math.floor(parseInt(bidData.tokenAmount, 10) / parseInt(bidData._goal, 10)) * statsUniqueClicks))
                     : 0}
                 {' ADX'}
             </TableCell>
@@ -252,9 +252,9 @@ export const getCommonBidData = ({ bid, t, side }) => {
 
     const bidData = {
         _id: bid._id || '-',
-        _amount: adxToFloatView(bid._amount) + ' ADX',
-        amount: bid._amount,
-        _target: bid._target,
+        _tokenAmount: adxToFloatView(bid._tokenAmount) + ' ADX',
+        tokenAmount: bid._tokenAmount,
+        _goal: bid._goal,
         clicksCount: bid.clicksCount || '-',
         _state:
             <span
@@ -326,9 +326,9 @@ export const getPublisherBidData = ({ bid, t, transactions, side, item, account,
     const pendingTransaction = transactions[bid.unconfirmedStateTrHash]
     const pendingState = !!pendingTransaction ? pendingTransaction.state : (bid.unconfirmedStateId || null)
 
-    const noTargetsReached = bid.clicksCount < bid._target
+    const noTargetsReached = bid.clicksCount < bid._goal
     const canAccept = (bid._state === BID_STATES.DoesNotExist.id)
-    const canVerify = (bid._state === BID_STATES.Accepted.id) && ((bid.clicksCount >= bid._target) || bid._advertiserConfirmation)
+    const canVerify = (bid._state === BID_STATES.Accepted.id) && ((bid.clicksCount >= bid._goal) || bid._advertiserConfirmation)
     const canGiveup = bid._state === BID_STATES.Accepted.id
     const pendingGiveup = pendingState === BID_STATES.Canceled.id
     const pendingAccept = pendingState === BID_STATES.Accepted.id
@@ -392,7 +392,7 @@ export const getAdvertiserBidData = ({ bid, t, transactions, side, item, account
 
     const canCancel = (bid._state === BID_STATES.DoesNotExist.id)
     const canVerify = (bid._state === BID_STATES.Accepted.id) && !bid._advertiserConfirmation
-    const targetReached = bid.clicksCount >= bid._target
+    const targetReached = bid.clicksCount >= bid._goal
     const canRefund = (bid._state === BID_STATES.Accepted.id) && (bidData.bidExpires < Date.now()) && !bid._advertiserConfirmation
     const pendingCancel = pendingState === BID_STATES.Canceled.id
     const pendingRefund = pendingState === BID_STATES.Expired.id
@@ -469,9 +469,9 @@ export const getBidData = ({ bid, t, transactions, side, item, account, onSave }
 
 export const searchMatch = (bid) => {
     return (bid._id || '') +
-        (bid._amount || '') +
+        (bid._tokenAmount || '') +
         (bid._advertiser || '') +
         (bid._publisher || '') +
         (bid._timeout || '') +
-        (bid._target || '')
+        (bid._goal || '')
 }
